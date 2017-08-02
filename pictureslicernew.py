@@ -10,7 +10,6 @@ class newsegs:
    self.segments=[]
    self.size=size
    self.save=save
-   self.itterator=0
    self.picNames=[]
  def caculatePicPath(self, folder):
      self.picNames=[]
@@ -86,7 +85,6 @@ class newsegs:
 
  def calculatesegments(self, pieces, dest):
   for filename in os.listdir(self.folder)
-     self.itterator+=1
      for number in range(pieces):
     	#open file convert to np array
     	print filename, " ", number
