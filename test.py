@@ -68,26 +68,29 @@ def main(_):
     cross_entropy = graph.get_tensor_by_name("ent:0")
     train_step = tf.train.GradientDescentOptimizer(0.00001).minimize(cross_entropy)
     #tf.global_variables_initializer().run()
-  segmentsForTraining.gathersegments("precalctraining")
-  segmentsForTesting.gathersegments("precalctesting")  
+  segmentsForTraining.caculatePicPath("precalctraining")
+  segmentsForTesting.caculatePicPath("precalctesting")   
   epocs=100 
   while epocs>0:
-    epocs-=1
-    print (epocs)
+   epocs-=1
+   print (epocs)
+   while segmentsForTraining.itterator>len(segmentsForTraining.picNames):
+    segmentsForTraining.gathersegments("precalctraining")
     arrayofconnections=segmentsForTraining.segments
     for tup in arrayofconnections :
      batch_xs = [np.asarray([tup[0]]).flatten()]
      batch_ys = np.asarray([tup[1]])
      sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
-
+   while segmentsForTesting.itterator>len(segmentsForTesting.picNames):
+    segmentsForTesting.gathersegments("precalctraining")
     arrayofconnections=segmentsForTesting.segments
     images=[np.asarray(i[0]).flatten() for i in arrayofconnections]# flattern for now will need to convert it to 2d. Just a starting point
     tags=[i[1] for i in arrayofconnections]
   
     # Test trained model
-    correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    print("My accuracy is this ",  sess.run(accuracy, feed_dict={x: images,
+   correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
+   accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+   print("My accuracy is this ",  sess.run(accuracy, feed_dict={x: images,
                                       y_: tags}))
   save_path=saver.save(sess, "model.ckpt")
 

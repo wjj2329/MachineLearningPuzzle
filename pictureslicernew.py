@@ -10,6 +10,12 @@ class newsegs:
    self.segments=[]
    self.size=size
    self.save=save
+   self.itterator=0
+   self.picNames=[]
+ def caculatePicPath(self, folder):
+     self.picNames=[]
+     for pic in  os.listdir(folder):
+        self.picNames.append(pic)
  def calcgoodsegments(self, data, shape):
       attempt=0
       while True:
@@ -58,10 +64,10 @@ class newsegs:
                return (x, y, x2, y2)      
  
  def gathersegments(self, foldername):
-  for filename in os.listdir(foldername):
+    num= random.randint(0, (len(self.picNames)-1))   
+    filename=self.picNames[num]
     print "loading filename ", filename
     if filename[0]=='b':
-        print "I go to b"
         img=Image.open(foldername+"/"+filename)
         img.load()
         data=np.asarray(img, dtype="int32")
@@ -69,19 +75,18 @@ class newsegs:
         combo=(data, n)
         self.segments.append(combo)
     else:
-        print "I dont go to b" 
         img=Image.open(foldername+"/"+filename)
         img.load()
         data=np.asarray(img, dtype="int32")
         n=np.asarray([0,1])
         combo=(data, n)
         self.segments.append(combo)
-  random.shuffle(self.segments)                  
-
+    del self.picNames[num]
 
 
  def calculatesegments(self, pieces, dest):
-    for filename in os.listdir(self.folder):
+  for filename in os.listdir(self.folder)
+     self.itterator+=1
      for number in range(pieces):
     	#open file convert to np array
     	print filename, " ", number
@@ -105,7 +110,6 @@ class newsegs:
         #picture2=data[x+(self.size/2):x+self.size, y:y+self.size/2]
         n=np.asarray([0,1])
         tup=(picture1,n)
-        #self.segments.append(tup)
 
         #print picture1 for testing purposes
         #print picture2 for testing purposes
@@ -127,7 +131,6 @@ class newsegs:
         combo=np.vstack((badpic1,badpic2))
         n=np.asarray([1,0])
         tup2=(combo,  n)
-        #self.segments.append(tup2)
         #scipy.misc.imsave("b"+filename, data)
         scipy.misc.imsave(dest+"/b"+str(number)+filename, combo)
         #scipy.misc.imsave("b2"+filename, badpic2)
