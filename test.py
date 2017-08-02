@@ -15,11 +15,11 @@ import time
 
 FLAGS = None
 restore=False
-newData=False
+newData=True
     
 def main(_):
   # Import data
-  numofpixels=400;
+  numofpixels=200;
   while(numofpixels%4!=0):  #unfortunaly we can't cut pixels in half MUST BE divisble by 4 for my pictureslicer to work
      numofpixels+=1
   #temp=cut.cutter("donaldtrump.jpg", numofpixels)
@@ -29,7 +29,7 @@ def main(_):
   segmentsForTraining=pictureslicernew.newsegs(numofpixels, "training", True) #this is the size may or may not be a good starting point
   segmentsForTesting=pictureslicernew.newsegs(numofpixels, "test", True)
   if newData:
-   segmentsForTraining.calculatesegments(1000,"precalctraining")
+   segmentsForTraining.calculatesegments(100,"precalctraining")
    segmentsForTesting.calculatesegments(100,"precalctesting")
 
   matrixsize=((numofpixels/2)*(numofpixels/2))*3
@@ -70,7 +70,7 @@ def main(_):
     #tf.global_variables_initializer().run()
   segmentsForTraining.gathersegments("precalctraining")
   segmentsForTesting.gathersegments("precalctesting")  
-  epocs=1000 
+  epocs=100 
   while epocs>0:
     epocs-=1
     print (epocs)
