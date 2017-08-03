@@ -93,7 +93,7 @@ class newsegs:
     for filename in os.listdir(self.folder):
      for number in range(pieces):
       #open file convert to np array
-      print filename, " ", number
+      #print filename, " ", number
       if filename!=".DS_Store":
         img=Image.open(self.folder+"/"+filename)
         img.load()
