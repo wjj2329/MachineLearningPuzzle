@@ -14,7 +14,7 @@ class newsegs:
  def calcgoodsegments(self, data, shape):
       attempt=0
       while True:
-          if (shape[0]-(self.size-1)<=0):
+          if (shape[0]-(self.size-1)<=0 or shape[1]-(self.size-1) ):
             return (-1, -1)
           x=random.randint(0,(shape[0]-(self.size)-1))
           y=random.randint(0,(shape[1]-(self.size)-1))
