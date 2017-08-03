@@ -1,5 +1,5 @@
 import numpy as np
-import scipy.misc
+import scipy
 import os
 from PIL import Image
 import random
@@ -7,14 +7,10 @@ import random
 class newsegs:
  def __init__(self, size,folder, save):
    self.folder=folder
-   self.segments=[]
    self.size=size
    self.save=save
-   self.picNames=[]
- def caculatePicPath(self, folder):
-     self.picNames=[]
-     for pic in  os.listdir(folder):
-        self.picNames.append(pic)
+   self.files=[]
+   self.foldername=""
  def calcgoodsegments(self, data, shape):
       attempt=0
       while True:
@@ -62,32 +58,43 @@ class newsegs:
                   continue   
                return (x, y, x2, y2)      
  
- def gathersegments(self, foldername):
-    num= random.randint(0, (len(self.picNames)-1))   
-    filename=self.picNames[num]
-    print "loading filename ", filename
-    if filename[0]=='b':
-        img=Image.open(foldername+"/"+filename)
-        img.load()
-        data=np.asarray(img, dtype="int32")
-        n=np.asarray([1,0])
-        combo=(data, n)
-        self.segments.append(combo)
-    else:
-        img=Image.open(foldername+"/"+filename)
-        img.load()
-        data=np.asarray(img, dtype="int32")
-        n=np.asarray([0,1])
-        combo=(data, n)
-        self.segments.append(combo)
-    del self.picNames[num]
-
+ def gatherFiles(self, foldername):
+  for filename in os.listdir(foldername):
+      if filename !=".DS_Store":
+       self.files.append(filename)
+  random.shuffle(self.files)
+  self.foldername=foldername                  
+ 
+ def getBatch(self):
+    toreturn=[]
+    for x in range(100):
+        if(len(self.files)<1):
+          return toreturn
+        loc=random.randint(0,(len(self.files)-1))
+        filename=self.files[loc]
+        if filename[0]=='b':
+         img=Image.open(self.foldername+"/"+filename)
+         img.load()
+         data=np.asarray(img, dtype=np.float32)
+         n=np.asarray([1,0], dtype=np.float32)
+         combo=(data, n)
+         toreturn.append(combo)
+        else:
+         img=Image.open(self.foldername+"/"+filename)
+         img.load()
+         data=np.asarray(img, dtype=np.float32)
+         n=np.asarray([0,1], dtype=np.float32)
+         combo=(data, n)
+         toreturn.append(combo)
+        del self.files[loc]
+    return toreturn    
 
  def calculatesegments(self, pieces, dest):
-  for filename in os.listdir(self.folder)
+    for filename in os.listdir(self.folder):
      for number in range(pieces):
-    	#open file convert to np array
-    	print filename, " ", number
+      #open file convert to np array
+      print filename, " ", number
+      if filename!=".DS_Store":
         img=Image.open(self.folder+"/"+filename)
         img.load()
         data=np.asarray(img, dtype="int32")
@@ -108,6 +115,7 @@ class newsegs:
         #picture2=data[x+(self.size/2):x+self.size, y:y+self.size/2]
         n=np.asarray([0,1])
         tup=(picture1,n)
+        #self.segments.append(tup)
 
         #print picture1 for testing purposes
         #print picture2 for testing purposes
@@ -129,6 +137,7 @@ class newsegs:
         combo=np.vstack((badpic1,badpic2))
         n=np.asarray([1,0])
         tup2=(combo,  n)
+        #self.segments.append(tup2)
         #scipy.misc.imsave("b"+filename, data)
         scipy.misc.imsave(dest+"/b"+str(number)+filename, combo)
         #scipy.misc.imsave("b2"+filename, badpic2)

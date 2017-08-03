@@ -19,7 +19,7 @@ newData=True
     
 def main(_):
   # Import data
-  numofpixels=200;
+  numofpixels=200
   while(numofpixels%4!=0):  #unfortunaly we can't cut pixels in half MUST BE divisble by 4 for my pictureslicer to work
      numofpixels+=1
   #temp=cut.cutter("donaldtrump.jpg", numofpixels)
@@ -67,31 +67,37 @@ def main(_):
     saver = tf.train.Saver()
     cross_entropy = graph.get_tensor_by_name("ent:0")
     train_step = tf.train.GradientDescentOptimizer(0.00001).minimize(cross_entropy)
-    #tf.global_variables_initializer().run()
-  segmentsForTraining.caculatePicPath("precalctraining")
-  segmentsForTesting.caculatePicPath("precalctesting")   
-  epocs=100 
-  while epocs>0:
-   epocs-=1
-   print (epocs)
-   while segmentsForTraining.itterator>len(segmentsForTraining.picNames):
-    segmentsForTraining.gathersegments("precalctraining")
-    arrayofconnections=segmentsForTraining.segments
-    for tup in arrayofconnections :
-     batch_xs = [np.asarray([tup[0]]).flatten()]
-     batch_ys = np.asarray([tup[1]])
-     sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
-   while segmentsForTesting.itterator>len(segmentsForTesting.picNames):
-    segmentsForTesting.gathersegments("precalctraining")
-    arrayofconnections=segmentsForTesting.segments
-    images=[np.asarray(i[0]).flatten() for i in arrayofconnections]# flattern for now will need to convert it to 2d. Just a starting point
-    tags=[i[1] for i in arrayofconnections]
-  
+    #tf.global_variables_initializer().run() 
+  epocs=0 
+  while epocs<1000:
+    segmentsForTraining.gatherFiles("precalctraining")
+    segmentsForTesting.gatherFiles("precalctesting") 
+    epocs+=1
+    print ("TESTING FOR ",epocs)
+    while len(segmentsForTraining.files)>0:
+     #print ("I TEST ARROUND") 
+     arrayofconnections=segmentsForTraining.getBatch()
+     for tup in arrayofconnections :
+      batch_xs = [np.asarray([tup[0]]).flatten()]
+      batch_ys = np.asarray([tup[1]])
+      sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
+    print ("TRAINING FOR ",epocs)
+    truescore=0.0
+    rounds=0.0
+    while len(segmentsForTesting.files)>0:
+     arrayofconnections=segmentsForTesting.getBatch()
+     images=[np.asarray(i[0]).flatten() for i in arrayofconnections]# flattern for now will need to convert it to 2d. Just a starting point
+     tags=[i[1] for i in arrayofconnections]
     # Test trained model
-   correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
-   accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-   print("My accuracy is this ",  sess.run(accuracy, feed_dict={x: images,
-                                      y_: tags}))
+     tags=np.asarray(tags)
+     images=np.asarray(images)
+     correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
+     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+     score=  sess.run(accuracy, feed_dict={x: images,
+                                      y_: tags})
+     truescore+=score
+     rounds+=1.0
+    print("My accuracy is ", truescore/rounds," for epoch ", epocs )
   save_path=saver.save(sess, "model.ckpt")
 
 if __name__ == '__main__':
