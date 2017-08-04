@@ -37,7 +37,8 @@ def main(_):
   # Create the model
   if  not restore:
    x = tf.placeholder(tf.float32, [None, matrixsize], name="x")
-   W = tf.Variable(tf.zeros([matrixsize,2]), name="W")
+   weights=np.random.uniform((matrixsize, 2)   
+   W = tf.Variable(weights, name="W")
    b = tf.Variable(tf.zeros([2]), name="b")
    y = tf.matmul(x, W) + b
 
