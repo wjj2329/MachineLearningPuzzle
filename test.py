@@ -15,7 +15,7 @@ import time
 
 FLAGS = None
 restore=False
-newData=True
+newData=False
     
 def main(_):
   # Import data
@@ -68,10 +68,14 @@ def main(_):
     cross_entropy = graph.get_tensor_by_name("ent:0")
     train_step = tf.train.GradientDescentOptimizer(0.00001).minimize(cross_entropy)
     #tf.global_variables_initializer().run() 
-  epocs=0 
+  epocs=0
+  segmentsForTraining.gatherFiles("precalctraining")
+  segmentsForTesting.gatherFiles("precalctesting")
+  trainingDeepCopy=segmentsForTraining.files[:]
+  testingDeepCopy=segmentsForTesting.files[:]
   while epocs<1000:
-    segmentsForTraining.gatherFiles("precalctraining")
-    segmentsForTesting.gatherFiles("precalctesting") 
+    segmentsForTraining.files=trainingDeepCopy[:]
+    segmentsForTesting.files=testingDeepCopy[:]
     epocs+=1
     print ("TESTING FOR ",epocs)
     while len(segmentsForTraining.files)>0:
@@ -91,6 +95,7 @@ def main(_):
     # Test trained model
      tags=np.asarray(tags)
      images=np.asarray(images)
+     print( "I feed it tags of shape ", tags.shape, " and I feed it images of shape ", images.shape)
      correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
      accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
      score=  sess.run(accuracy, feed_dict={x: images,

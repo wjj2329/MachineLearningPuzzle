@@ -14,7 +14,7 @@ class newsegs:
  def calcgoodsegments(self, data, shape):
       attempt=0
       while True:
-          if (shape[0]-(self.size-1)<=0 or (shape[1]-(self.size-1))<=0 ):
+          if (shape[0]-(self.size-1)<=0 or (shape[1]-(self.size-1))<=1 ):
             return (-1, -1)
           x=random.randint(0,(shape[0]-(self.size)-1))
           y=random.randint(0,(shape[1]-(self.size)-1))
@@ -68,14 +68,17 @@ class newsegs:
  def getBatch(self):
     toreturn=[]
     for x in range(100):
-        if(len(self.files)<1):
+        if(len(self.files)<1 or x>= len(self.files)):
           return toreturn
-        loc=random.randint(0,(len(self.files)-1))
+        loc=x
         filename=self.files[loc]
         if filename[0]=='b':
          img=Image.open(self.foldername+"/"+filename)
          img.load()
          data=np.asarray(img, dtype=np.float32)
+         if data.ndim!=3:
+            del self.files[loc]
+            continue
          n=np.asarray([1,0], dtype=np.float32)
          combo=(data, n)
          toreturn.append(combo)
@@ -83,11 +86,14 @@ class newsegs:
          img=Image.open(self.foldername+"/"+filename)
          img.load()
          data=np.asarray(img, dtype=np.float32)
+         if data.ndim!=3:
+             del self.files[loc]
+             continue
          n=np.asarray([0,1], dtype=np.float32)
          combo=(data, n)
          toreturn.append(combo)
         del self.files[loc]
-    return toreturn    
+    return toreturn
 
  def calculatesegments(self, pieces, dest):
     for filename in os.listdir(self.folder):
